@@ -1,0 +1,8 @@
+#NEXUS
+
+begin trees;
+   [A test tree created to illustrate calculation of phylogenetic endemism.
+   Dan Rosauer - November 2008]
+
+   tree PE_example = ((E_ambigua:1,E_obscura_A221:1):1,E_indistincta:2);
+end;

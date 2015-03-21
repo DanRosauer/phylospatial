@@ -1,0 +1,4 @@
+Tree_name,Spatial_name
+E_ambigua,Eucalyptus ambigua
+E_obscura_A221,Eucalyptus obscura
+E_indistincta,Eucalyptus indistincta
