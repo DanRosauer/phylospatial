@@ -1,18 +1,17 @@
 # phylospatial
 Scripts to do interesting things with phylogenetic trees and spatial data
 
-Just added: 
-
 * R scripts to calculate Phylogenetic Endemism
 	including sample scripts and data
   
-Coming soon:
+And just added:
   
-* Python scripts to model the distribution of intraspecific lineages, to go with our forthcoming paper in PlosOne
+* Python scripts to estimate the distribution of intraspecific lineages, to go with our paper in PlosOne
+  Warning: this section is not [yet] guaranteed to be user friendly, but feedback welcome
   
 
 Dan Rosauer<p>
 dan.rosauer@anu.edu.au<p>
 https://sites.google.com/site/danielrosauer<p>
 
-21 March 2015
+6 November 2015
