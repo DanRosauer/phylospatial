@@ -1,7 +1,10 @@
 #### Dan Rosauer                        ####
 #### Australian National University     ####
 #### September 2012 - October 2015      ####
-#### dan.rosauer@anu.edu,au             ####
+#### dan.rosauer@anu.edu.au             ####
+
+## This script uses a set of species distribution models and a set of points for intraspecific lineages
+## to generate lineage distribution models.
 
 ## STEPS WHICH THE CODE DOES
 ## 1. import the points for the whole species
@@ -37,7 +40,7 @@ from arcpy.sa import *
 arcpy.CheckOutExtension("Spatial")
 arcpy.env.overwriteOutput=True
 
-sys.path.append("C:\\Users\\u3579238\\Work\\Software\\dan-github\\phylospatial-dev")
+sys.path.append("FILE PATH TO SpatialFunctions.py")
 from SpatialFunctions import *
 
 ### PARAMETERS ###
@@ -45,23 +48,23 @@ alert_sound = True
 if alert_sound:
     import winsound
 
-genus_list = ["Gehyra"]
+genus_list = ["Gehyra"] # allows script to run for one or more genera
 
-base_dir = "C:\\Users\\u3579238\\work\\AMT\\Models\\"
+base_dir = "FILE PATH TO ROOT OF MODEL DIRECTORY STRUCTURE\\Models\\"
 target_location = base_dir + "lineage_models\\"  # where the lineage model grids and working data
 output_gdb_name = "lineage_models.gdb"
 scratch_workspace = base_dir  #scratch workspace is used by ArcGIS for temporary files during analysis
 scratch_gdb_name = "scratch.gdb"
 export_asc = True
-asc_target_location = base_dir + "lineage_models\\asc\\"
+asc_target_location = base_dir + "lineage_models\\asc\\"  # assumes that output lineage models are wanted as ascii grids
 
-buffer_dist = 2.5      # the buffer distance in degrees
+buffer_dist = 2.5      # the buffer distance in map units (presumably decimal degrees)
 additional_buffer = 0  ## how much (as a proportion) the output grids should extend beyond the buffered points
 grid_resolution = 0.01
 spRef = "GEOGCS['GCS_WGS_1984',DATUM['D_WGS_1984',SPHEROID['WGS_1984',6378137.0,298.257223563]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]]"
 
-Australia_extent = arcpy.Extent(112.9,-25,153.64,-9)
-Lineage_field_name = "lineage_from_mtDNA"
+Model_extent = arcpy.Extent(112.9,-25,153.64,-9)    # the maximum extent for all lineage models
+Lineage_field_name = "lineage_from_mtDNA"           # the column for lineage name in the site data    
 Distance_method = "model-cost"      ## determines whether distance is calculated as euclidean or model-weighted cost distance
                                     ## so far, can be "euclidian" or "model-cost"
 Weight_function = "inverse_cube"    ## determines whether lineage weight is calculated as 1/distance or 1/(distance^2), or simply closest distance
@@ -69,30 +72,25 @@ Weight_function = "inverse_cube"    ## determines whether lineage weight is calc
 Min_dist_value = grid_resolution/2  ## remove as a parameter, once working
                                     ##   but keep current value for consistency in this study
 Min_weight_threshold = 0.02         ## weights below this for any layer are set to 0.  If the value here is 0, then no threshold is applied
-Scale_to = "model"                  ## determines whether lineage weights sum to the model suitability or to 1
+Scale_to = "model"                  ## determines whether lineage weights within a model group sum to the model suitability or to 1
                                     ## can be "model" or "one"
-model_edited_suffix = "_edited"     ## this is to check if there is a version of the model cliiped to reduce overprediction
 
-handle_minor = ""        ## if true, then lineages with < than the specified proportion of the lineage sum 
-omit_minor_threshold = 0.1         ## for that cell, are set to 0
+handle_minor = ""                   ## if true, then lineages with < than the specified proportion of the lineage sum 
+omit_minor_threshold = 0.1          ## for that cell, are set to 0
 
 skip_distance_layers = False         ## skip creating the distance layers - they are already done.  THIS OPTION IS ONLY TO SAVE TIME DURING DEBUGGING
 
 # a changeable list to allow for species in the dataset to be skipped
-named_species   = ["borroloola", "multi_occi", "nana_A", "nana_B", "kimberleyi", "s_kimberley"]
-use_list        = "do"  #specify whether to:
+named_species   = []
+use_list        = ""  #specify whether to:
                         #do - the named species (use_list="do")
                         #skip - the named species (use_list="skip")
                         #do all the species in the data and ignore the named species list (use_list="" or anything else);
-Lin_exclude_list = []
 
-# the following parameters set up the option of dispersal through shallow water, to better estimate occurrence on coastal islands
-allow_dispersal_through_sea 	= True  # if this is False, the other water dispersal parameters can be ignored
-max_suitability_of_water 	= 0.075
-depth_mask_grid			= "C:\\Users\\u3579238\\GISData\\EnvironmentGrids\\Australia_Env_01\\Ascii\\depthabove120.asc"
-#sea_smooth_radius               = 0.5
+Lin_exclude_list = []   # this list allows for skipping at the lineage level
 
 ############### END OF PARAMETERS ###############
+
 try:
     print "Lineage Distribution Estimation Tool"
     print "Dan Rosauer - October 2015\n"
@@ -180,7 +178,7 @@ try:
         # set the geoprocessing environment
         env.workspace  = target_location_ESRI + output_gdb_name
         env.scratchWorkspace = scratch_workspace + scratch_gdb_name
-        env.extent = Australia_extent
+        env.extent = Model_extent
         
         # Make XY Event Layer
         points_layer = "sequenced_sites"
@@ -217,10 +215,7 @@ try:
             
                 print "\nStarting group " + genus + " " + group + " at " + datetime.datetime.now().strftime("%I:%M %p") + "\n"
                 
-                # check for an edited verion of the Maxent model, and use if it exists
                 maxent_model = maxent_model_base + "\\" + genus + "_" + string.replace(group," ","_")
-                if arcpy.Exists(maxent_model + model_edited_suffix):
-                    maxent_model = maxent_model + model_edited_suffix
                     
                 ## get a list of the lineages in this group
                 lineage_list=[]
@@ -241,23 +236,7 @@ try:
                 env.mask        = maxent_model
                 env.extent      = maxent_model
                 
-                # if allowing dispersal through shallow water, set that here.  Not needed for a single lineage, because no dispersal model is used
-                if allow_dispersal_through_sea and len(lineage_list) > 1:
-                    print "\nAdjusting model to allow for connectivity via sea."
-                    #neighborhood = NbrCircle(50, "CELL")
-                    #maxent_model_smooth = FocalStatistics(maxent_model, neighborhood, "MEAN", True)
-                    #maxent_model_smooth.save("model_smooth_test")
-                    env.mask = depth_mask_grid
-                    maxent_model_null  = IsNull(maxent_model)
-                    maxent_model_null.save("maxent_model_null")
-                    maxent_model_w_sea = Con("maxent_model_null", max_suitability_of_water, maxent_model, "VALUE = 1")
-                    maxent_model_w_sea.save("model_sea")
-                    layers_to_delete.extend(["maxent_model_null","model_sea"])
-                    
-                    maxent_raster = maxent_model_w_sea   # use the model with sea connectivity
-                    del maxent_model_null
-                else:
-                    maxent_raster = arcpy.sa.Raster(maxent_model)
+                maxent_raster = arcpy.sa.Raster(maxent_model)
                     
                 if len(lineage_list) > 1:  # proceed with lineage models if there are multiple lineages - otherwise just copy the SDM for the model group
                     
@@ -356,10 +335,6 @@ try:
                             
                         # set NoData values to 0
                         lin_weight=arcpy.sa.Con(arcpy.sa.IsNull(lin_weight),0,lin_weight)
-                        
-                        # mask lineage weight layers to the maxent model - they will extend beyond where sea dispersal is allowed.
-                        if allow_dispersal_through_sea:
-                            lin_weight = ExtractByMask(lin_weight, maxent_model)
                     
                         lin_weight.save(lineage_weight_gridname)  ## this layer should be kept until the final weights are calculated
                         
