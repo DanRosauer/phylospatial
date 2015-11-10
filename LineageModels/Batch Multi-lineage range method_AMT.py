@@ -44,11 +44,8 @@ sys.path.append("FILE PATH TO SpatialFunctions.py")
 from SpatialFunctions import *
 
 ### PARAMETERS ###
-alert_sound = True
-if alert_sound:
-    import winsound
 
-genus_list = ["Gehyra"] # allows script to run for one or more genera
+genus_list = ["Demo"] # allows script to run for one or more genera
 
 base_dir = "FILE PATH TO ROOT OF MODEL DIRECTORY STRUCTURE\\Models\\"
 target_location = base_dir + "lineage_models\\"  # where the lineage model grids and working data
@@ -97,8 +94,6 @@ try:
     
     for genus in genus_list:
         print "\nGenus: " + genus + "\n"
-        if alert_sound:
-            winsound.PlaySound("SystemExit", winsound.SND_ALIAS)
     
         lineage_site_filename = base_dir + "species_sites\\" + genus + "_sites.csv"
         maxent_model_base = base_dir + "species_models\\maxent\\maxent_models.gdb"
@@ -437,15 +432,9 @@ try:
         print "\nLineage models done for " + genus + "\n"
             
     print "\nLineage models done!\n" + datetime.datetime.now().strftime("%I:%M %p on %B %d, %Y") + "\n"
-    if alert_sound:
-        winsound.PlaySound("SystemExit", winsound.SND_ALIAS)
-        winsound.PlaySound("SystemExit", winsound.SND_ALIAS)
-        winsound.PlaySound("SystemExit", winsound.SND_ALIAS)
 
 except:
     print "Unexpected error:", sys.exc_info()[0]
     raise
 finally:
     os.system('pause')
-    if alert_sound:
-        winsound.PlaySound("SystemExit", winsound.SND_ALIAS)
