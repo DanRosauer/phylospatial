@@ -10,7 +10,7 @@ library(foreach)
 library(doParallel)
 library(ggplot2)
 
-source("C:/Users/u3579238/Work/Software/dan-github/phylospatial-dev/diversity/phylogenetic endemism.r")
+source("PATH TO YOUR CODE/phylogenetic endemism.r")
 
 ################################################################################
 #first define some functions
@@ -55,21 +55,21 @@ image.width=1400
 image.height=1400
 
 #define directories
-base.dir        <- 'C:/Users/u3579238/Work/AMT/Models/'
+base.dir        <- 'Your working location/Models/'      # modify to the base directory for your lineage modelling
 input.dir       <- 'lineage_models/asc_aligned/'
-output.dir      <- 'C:/Users/u3579238/Work/AMT/Diversity/'
-file_pattern    <- 'lin_model_Gehyra'
+output.dir      <- 'Your working location/Diversity/'  # output location where diversity results and maps will be saved
+file_pattern    <- 'lin_model_ETC'                     # modify this to a match the start of the name of all lineage model asc files
 
-template_grid   <- 'C:/Users/u3579238/Work/AMT/Models/lineage_models/AMT_template.asc.gz'
-group_lin_file  <- 'C:/Users/u3579238/Work/AMT/Diversity/group_lineage_list_6Nov15.csv'
+template_grid   <- 'Your working location/Models/lineage_models/AMT_template.asc.gz'
+group_lin_file  <- 'Your working location/Diversity/group_lineage_list.csv'
 
 #tree details  - this works for one genus at a time
-tree.file       <- 'trees/Gehyra_MCC_tree_310715_xeno.tre'
+tree.file       <- 'Your working location/Models/trees/Your phylogeny.tre'
 outgroup        <- ''
 preface         <- 'lin_model_'
 
-genus           <- 'Gehyra'
-output_prefix   <- "Gehyra_xeno_grp_"
+genus           <- 'Your genus'
+output_prefix   <- 'Genus_'
 threshold       <- 0.01  # this is not a species level threshold, but one used for each lineage model
 
 ####  end of parameters  ####
@@ -240,9 +240,9 @@ PD.ras <- raster(filenames[2])
 map_filename <- paste(output_prefix, "PD.png", sep="")
 map_raster(PD.ras, map_filename, paste(output_prefix, "PD"))
 
-# WE.ras <- raster(filenames[3])
-# map_filename <- paste(output_prefix, "WE.png", sep="")
-# map_raster(WE.ras, map_filename, paste(output_prefix, "WE"))
+WE.ras <- raster(filenames[3])
+map_filename <- paste(output_prefix, "WE.png", sep="")
+map_raster(WE.ras, map_filename, paste(output_prefix, "WE"))
 
 WElog.ras <- log(WE.ras)
 map_filename <- paste(output_prefix, "logWE.png", sep="")
