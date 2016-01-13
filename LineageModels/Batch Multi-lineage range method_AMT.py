@@ -6,15 +6,18 @@
 ## This script uses a set of species distribution models and a set of points for intraspecific lineages
 ## to generate lineage distribution models.
 
+## It uses spatial functions in the program ArcGIS, so an ArcGIS Installation and license are required.
+## A truly open source version (in R not Python) is envisaged, but not close to happening yet.
+
 ## STEPS WHICH THE CODE DOES
 ## 1. import the points for the whole species
 ##
-## 2. to bound the whole analysis, use euc distance to create a grid to define a boundary at a set distance
+## 2. to bound the whole analysis, use euclidian distance to create a grid to define a boundary at a set distance
 ##
-## 3. outside of this code (or from within if we can call Maxent like from R) generate a species distribution model for the whole species
+## 3. load a species distribution model for the whole species, generated before running this script
 ##
 ## 4. loop through all of the lineages in the species
-##    5a. generate a euc distance layer from sequenced locations for each lineage, bounded by the total species euc distance layer from (2)
+##    5a. generate a euc distance layer from sequenced locations for each lineage, bounded by the total species euclidean distance layer from (2)
 ##     or 
 ##    5b. generate a cost distance layer from sequenced locations for each lineage, using the maxent model to define the cost.  Cost = 1 - suitability
 ##    
