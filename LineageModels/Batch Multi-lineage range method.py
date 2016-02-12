@@ -1,6 +1,6 @@
 #### Dan Rosauer                        ####
 #### Australian National University     ####
-#### September 2012 - October 2015      ####
+#### September 2012 - February 2016     ####
 #### dan.rosauer@anu.edu.au             ####
 
 ## This script uses a set of species distribution models and a set of points for intraspecific lineages
@@ -30,6 +30,14 @@
 ## 8. sum all of the lineage weight layers
 ##
 ## 9. divide each lineage weight layer by the sum of weights (8) so that the weights for each pixel sum to 1
+##      An option in this step, is to exclude lineages from a pixel where they have a low probablility of occurring.  Initial models found
+##      lineages predicted over a wide area beyond their primary range, but with very low values.  To use this option set the parameters:
+##          handle_minor = "threshold"
+##          omit_minor_threshold = 0.1  - as an example, 0.1 means that a lineage with less that 10% of the total of all potential lineages
+##                                      for that species, in the pixel, would be omitted, with the model scaled across the lineages more
+##                                      likely to occur in that pixel
+##      To not use this option, simply set
+##          handle_minor = ""
 ##
 ## 10. multiply each lineage weight layer by the model likelihood so that the weights for each pixel sum to the model likelihood.
 
@@ -75,7 +83,7 @@ Min_weight_threshold = 0.02         ## weights below this for any layer are set 
 Scale_to = "model"                  ## determines whether lineage weights within a model group sum to the model suitability or to 1
                                     ## can be "model" or "one"
 
-handle_minor = ""                   ## if true, then lineages with < than the specified proportion of the lineage sum 
+handle_minor = "threshold"          ## if handle_minor = 'threshold', then lineages with < than the specified proportion of the lineage sum 
 omit_minor_threshold = 0.1          ## for that cell, are set to 0
 
 skip_distance_layers = False         ## skip creating the distance layers - they are already done.  THIS OPTION IS ONLY TO SAVE TIME DURING DEBUGGING
@@ -356,7 +364,7 @@ try:
                         count = 0
                         for lineage in lineage_list:                                ## STEPS 9 and 10
                             count += 1
-                            if str(lineage) != "0":  #lineage 0 is used to refer to sequenced locations without a named lineage.
+                            if str(lineage) != "0":  # lineage 0 is used to refer to sequenced locations without a named lineage.
                                 print "Removing lineage values which account for less than " + (str(omit_minor_threshold*100)) + "% of pixel score. " + lineage
                                 lineage_weight_gridname = "lin_wt_" + string.replace(group," ","_") +"_" + lineage 
                                 lin_weight = arcpy.sa.Raster(lineage_weight_gridname)
