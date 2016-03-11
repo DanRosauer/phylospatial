@@ -1,7 +1,22 @@
-#### Dan Rosauer                        ####
+#### This script uses a set of species distribution models and a set of points 
+#### for intraspecific lineages to generate lineage distribution models.
+#### Copyright Dan Rosauer 2016         ####
 #### Australian National University     ####
 #### September 2012 - February 2016     ####
 #### dan.rosauer@anu.edu.au             ####
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ## This script uses a set of species distribution models and a set of points for intraspecific lineages
 ## to generate lineage distribution models.
@@ -41,7 +56,6 @@
 ##
 ## 10. multiply each lineage weight layer by the model likelihood so that the weights for each pixel sum to the model likelihood.
 
-## All of the above could be nested within a loop that iterates through species.
 
 ############### PARAMETERS ###############
 import arcpy
