@@ -93,7 +93,7 @@ Weight_function = "inverse_cube"    ## determines whether lineage weight is calc
                                     ## so far, can be "inverse" or "inverse_square" or "cost_allocation"
 Min_dist_value = grid_resolution/2  ## remove as a parameter, once working
                                     ##   but keep current value for consistency in this study
-Min_weight_threshold = 0.02         ## weights below this for any layer are set to 0.  If the value here is 0, then no threshold is applied
+#Min_weight_threshold = 0.02         ## weights below this for any layer are set to 0.  If the value here is 0, then no threshold is applied
 Scale_to = "model"                  ## determines whether lineage weights within a model group sum to the model suitability or to 1
                                     ## can be "model" or "one"
 
@@ -121,12 +121,13 @@ try:
         print "\nGenus: " + genus + "\n"
     
         lineage_site_filename = base_dir + "species_sites\\" + genus + "_sites.csv"
-        maxent_model_base = base_dir + "species_models\\maxent\\maxent_models.gdb"
+        SDM_model_base = base_dir + "species_models\\maxent\\maxent_models.gdb"
     
         # create the scratch geodatabase if needed (to store temporary layers during analysis)
         scratch_gdb_path = scratch_workspace + scratch_gdb_name
         if not arcpy.Exists(scratch_gdb_path):
-            arcpy.CreateFileGDB_management(scratch_workspace, scratch_gdb_name)
+            #arcpy.CreateFileGDB_management(scratch_workspace, scratch_gdb_name)\
+            print "Commented line above - uncomment"
         
         # create the output geodatabase if needed
         if not os.path.exists(target_location):
@@ -218,7 +219,7 @@ try:
             print arcpy.GetMessages()
         points_fc = outLocation + "/" + outFeatureClass
         
-        # restrict the GroupList to particular species based on the names_species parameter
+        # restrict the GroupList to particular species based on the named_species parameter
         if use_list == "do":
             GroupList = list(set(named_species).intersection(set(GroupList)))
         elif use_list == "skip":
@@ -235,7 +236,7 @@ try:
             
                 print "\nStarting group " + genus + " " + group + " at " + datetime.datetime.now().strftime("%I:%M %p") + "\n"
                 
-                maxent_model = maxent_model_base + "\\" + genus + "_" + string.replace(group," ","_")
+                SDM_model = SDM_model_base + "\\" + genus + "_" + string.replace(group," ","_")
                     
                 ## get a list of the lineages in this group
                 lineage_list=[]
@@ -252,11 +253,11 @@ try:
                 layers_to_delete = []
                 
                 # set the environment
-                env.snapRaster  = maxent_model
-                env.mask        = maxent_model
-                env.extent      = maxent_model
+                env.snapRaster  = SDM_model
+                env.mask        = SDM_model
+                env.extent      = SDM_model
                 
-                maxent_raster = arcpy.sa.Raster(maxent_model)
+                SDM_raster = arcpy.sa.Raster(SDM_model)
                     
                 if len(lineage_list) > 1:  # proceed with lineage models if there are multiple lineages - otherwise just copy the SDM for the model group
                     
@@ -264,7 +265,7 @@ try:
                     groupDefQuery = "[ModelGroup] = '" + group + "'"
                     points_layer.definitionQuery = groupDefQuery
         
-                    maxent_extent = maxent_raster.extent
+                    SDM_extent = SDM_raster.extent
                     
                     # get the extent of the points for the model group
                     yrange = getFieldMinMax(points_fc,header[lat_col])
@@ -278,11 +279,11 @@ try:
                     extent_buffer = buffer_dist * buffer_ratio
                 
                     # new extent is the same as points layer + a buffer
-                    # but where the extended buffer goes beyond the extent of the maxent model, limit to the model extent (determined by the buffered environemnt grids)
-                    xmin=math.floor(max([xmin - extent_buffer,maxent_extent.XMin]))
-                    ymin=math.floor(max([ymin - extent_buffer,maxent_extent.YMin]))
-                    xmax=math.ceil(min([xmax + extent_buffer,maxent_extent.XMax]))
-                    ymax=math.ceil(min([ymax + extent_buffer,maxent_extent.YMax]))
+                    # but where the extended buffer goes beyond the extent of the maxent model, limit to the model extent (determined by the buffered environment grids)
+                    xmin=math.floor(max([xmin - extent_buffer,SDM_extent.XMin]))
+                    ymin=math.floor(max([ymin - extent_buffer,SDM_extent.YMin]))
+                    xmax=math.ceil(min([xmax + extent_buffer,SDM_extent.XMax]))
+                    ymax=math.ceil(min([ymax + extent_buffer,SDM_extent.YMax]))
                     env.extent = arcpy.Extent(xmin,ymin,xmax,ymax)
                 
                     ### generate a weight grid for each lineage  START OF STEP 4
@@ -294,11 +295,9 @@ try:
                     count = 0
                     
                     if Distance_method == "model-cost":
-                        model_cost = -1 * arcpy.sa.Ln(maxent_raster)
+                        model_cost = -1 * arcpy.sa.Ln(SDM_raster)
         
                     for lineage in lineage_list:
-                        # if lineage != 'planD':
-                        #     continue
                         
                         count += 1
                     
@@ -349,9 +348,9 @@ try:
                         arcpy.SelectLayerByAttribute_management(lin_lyr, "CLEAR_SELECTION")
                     
                         # apply a threshold to each weight grid                 ## STEP 7
-                        if Min_weight_threshold > 0:
-                            where_clause = '"VALUE" >= ' + str(Min_weight_threshold)
-                            lin_weight = arcpy.sa.Con(lin_weight, lin_weight, 0, where_clause)
+                        # if Min_weight_threshold > 0:
+                        #     where_clause = '"VALUE" >= ' + str(Min_weight_threshold)
+                        #     lin_weight = arcpy.sa.Con(lin_weight, lin_weight, 0, where_clause)
                             
                         # set NoData values to 0
                         lin_weight=arcpy.sa.Con(arcpy.sa.IsNull(lin_weight),0,lin_weight)
@@ -372,7 +371,7 @@ try:
                     
                     
                     # remove very small values for each pixel and rescale so the rest add up to the species model
-                    env.mask = maxent_model
+                    env.mask = SDM_model
                    
                     if handle_minor == "threshold":
                         count = 0
@@ -404,7 +403,7 @@ try:
                             lin_weight = arcpy.sa.Raster(lineage_weight_gridname)
                         
                             if Scale_to == "model":
-                                lin_weight_scaled = (lin_weight / weight_sum) * maxent_raster
+                                lin_weight_scaled = (lin_weight / weight_sum) * SDM_raster
                             else:
                                 lin_weight_scaled = (lin_weight / weight_sum)
                         
@@ -424,12 +423,12 @@ try:
                 else:
                     lineage = lineage_list[0]
                     lineage_scaled_weight_name = "lin_model_" + genus + "_" + string.replace(group," ","_") +"_" + lineage
-                    maxent_raster.save(lineage_scaled_weight_name)  # saving the maxent model for the model_group as the lineage model
+                    SDM_raster.save(lineage_scaled_weight_name)  # saving the maxent model for the model_group as the lineage model
                     print "created lineage grid for lineage " + lineage + " as a copy of the model for group: " + group
                     
                     if export_asc:
                         asc_filename = asc_target_location + lineage_scaled_weight_name + ".asc"
-                        arcpy.RasterToASCII_conversion(maxent_raster, asc_filename)
+                        arcpy.RasterToASCII_conversion(SDM_raster, asc_filename)
                         arcpy.DefineProjection_management(asc_filename, spRef)                
                     
                 print "\nAnalysis for " + group + " completed - now deleting temporary data."
