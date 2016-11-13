@@ -10,7 +10,7 @@ Scripts to do interesting things with phylogenetic trees and spatial data
 	
 * R scripts to calculate PD, PE and other metrics directly from a stack of lineage distribution models.
 
-* * R script to estimate the distribution of intraspecific lineages. So lineage distribution models are now fully open source.
+* R script to estimate the distribution of intraspecific lineages. So lineage distribution models are now fully open source.
 	This version is beta (13-Nov-2016) and feedback is welcome.    **NEW!**
   
 
