@@ -15,7 +15,7 @@ Scripts to do interesting things with phylogenetic trees and spatial data
 * R scripts to calculate PD, PE and other metrics directly from a stack of species or lineage distribution models.
 
 ### Conservation planning
-* Use Marxan to optimise area selection to conserve phylogenetic diversity (PD).  These scripts take spatial data and a phylogeny, and format the input files for Marxan.  This version is beta (20-Oct-2017) and feedback is welcome.  **NEW!**
+* Use Marxan to optimise area selection to conserve phylogenetic diversity (PD).  These scripts take spatial data and a phylogeny, and format the input files for Marxan.  _This version is beta (20-Oct-2017) and feedback is welcome_.  **NEW!**
 
 </p>
 
