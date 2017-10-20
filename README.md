@@ -19,7 +19,7 @@ Scripts to do interesting things with phylogenetic trees and spatial data
 
 </p>
 
-####Dan Rosauer
+#### Dan Rosauer
 dan.rosauer@anu.edu.au</p>
 https://sites.google.com/site/danielrosauer<p>
 
