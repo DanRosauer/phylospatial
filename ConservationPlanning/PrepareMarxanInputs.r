@@ -614,7 +614,7 @@ validate_occ = function(occ) {
   # occ$PU_ID is required, so if not valid, execution stops
   # if occ$Amount is not valid, a column of 1 is added with a warning
   if (class(occ) == "data.frame") {
-    if (class(Occ$TipName) %in% c("character", "factor", "integer")) {
+    if (class(occ$TipName) %in% c("character", "factor", "integer")) {
       if (class(occ$PU_ID) == "integer") {
 
         # get to here if occ is a valid data frame, TipName is a value column
